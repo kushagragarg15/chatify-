@@ -303,5 +303,6 @@ Chatify is built on Socket.IO, MongoDB, Cloudinary, Resend and Arcjet.
 ## Contact
 
 Kushagra Garg — [github.com/kushagragarg15](https://github.com/kushagragarg15)
+Tanushree Bobade — [github.com/tanushreebobade](https://github.com/tanushreebobade)
 
 Repository: [github.com/kushagragarg15/chatify-](https://github.com/kushagragarg15/chatify-)
