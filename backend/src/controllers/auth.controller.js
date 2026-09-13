@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
-import { generateToken } from "../lib/utils.js";
+import { generateToken, getAuthCookieOptions } from "../lib/utils.js";
 import dotenv from "dotenv";
 import { sendWelcomeEmail } from "../emails/emailHandlers.js";
 import cloudinary from "../lib/cloudinary.js";
@@ -91,14 +91,12 @@ export const login = async (req,res)=>{
 }
 
 export const logout =  (_,res) =>{
-    // Must match the attributes used in generateToken(), otherwise the browser
-    // won't recognize this as the same cookie and won't clear it.
-    const isProd = process.env.NODE_ENV === "production";
+    // Reuses generateToken()'s cookie options — the attributes must match
+    // what was used to set the cookie, otherwise the browser won't recognize
+    // this as the same cookie and won't clear it.
     res.cookie('token','',{
-        maxAge:0,
-        httpOnly:true,
-        sameSite: isProd ? "none" : "lax",
-        secure: isProd
+        ...getAuthCookieOptions(),
+        maxAge:0
     });
     res.status(200).json({message:"Logged out successfully"});
 }
