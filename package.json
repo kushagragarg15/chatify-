@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "engines": {
-    "node": "20.x"
+    "node": ">=22.21.0 <23 || >=24.5.0"
   },
   "scripts": {
     "build": "npm install --prefix backend && npm install --include=dev --prefix frontend && npm run build --prefix frontend",

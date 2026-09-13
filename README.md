@@ -78,7 +78,7 @@ npm install
 
 ### 3. Environment Configuration
 
-Create a `.env` file in the **backend** directory with the following variables:
+Create a `.env` file in the **backend** directory (a template is provided at `backend/.env.example`):
 
 ```env
 # Server Configuration
@@ -86,7 +86,7 @@ PORT=3000
 NODE_ENV=development
 
 # Database
-MONGODB_URI=your_mongodb_connection_string
+MONGO_URL=your_mongodb_connection_string
 
 # JWT Secret
 JWT_SECRET=your_jwt_secret_key
@@ -96,22 +96,25 @@ CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 
-# Resend Email Configuration
+# Resend Email Configuration (optional — signup works without it, the
+# welcome email is just skipped if RESEND_API_KEY is unset)
 RESEND_API_KEY=your_resend_api_key
-RESEND_EMAIL_FROM=your_verified_email@domain.com
+EMAIL_FROM=your_verified_email@domain.com
+EMAIL_FROM_NAME=Chatify
 
-# Arcjet Security
+# Arcjet Security (optional — requests just skip bot/rate-limit checks if unset)
 ARCJET_KEY=your_arcjet_key
+ARCJET_ENV=production
 
-# Client URL (for CORS)
+# Client URL (for CORS) — the deployed frontend's origin
 CLIENT_URL=http://localhost:5173
 ```
 
-Create a `.env` file in the **frontend** directory:
-
-```env
-VITE_API_URL=http://localhost:3000
-```
+For local development you don't need a frontend `.env` — `frontend/src/lib/axios.js`
+and `useAuthStore.js` already default to `http://localhost:3000` in dev mode.
+For deployment (frontend on Vercel, backend on Render), set
+`VITE_API_URL`/`VITE_SOCKET_URL` — see `frontend/.env.example` and Deployment
+below.
 
 ### 4. Start the Application
 
@@ -135,12 +138,17 @@ The application will be available at:
 
 #### Production Mode
 
+See [Deployment](#-deployment) below — the frontend deploys to Vercel and
+the backend to Render as separate services. To sanity-check a production
+build locally instead:
+
 ```bash
 # Build frontend
 cd frontend
 npm run build
+npm run preview   # serves dist/ at http://localhost:4173
 
-# Start backend (serves frontend build)
+# Start backend, pointing CLIENT_URL at the preview origin above
 cd backend
 NODE_ENV=production npm start
 ```
@@ -229,16 +237,18 @@ chatify/
 - `PUT /api/auth/update-profile` - Update user profile
 
 ### Messages
-- `GET /api/message/users` - Get all users for chat
-- `GET /api/message/:id` - Get messages with specific user
-- `POST /api/message/send/:id` - Send message to user
+- `GET /api/message/contacts` - Get all users available to chat with
+- `GET /api/message/chats` - Get users you've already exchanged messages with
+- `GET /api/message/:id` - Get messages with a specific user
+- `POST /api/message/send/:id` - Send a message to a user
+
+### Health
+- `GET /api/health` - Liveness/readiness check for uptime monitors and hosting platforms
 
 ### WebSocket Events
-- `connect` - Client connection
-- `disconnect` - Client disconnection
-- `sendMessage` - Send real-time message
-- `receiveMessage` - Receive real-time message
-- `getOnlineUsers` - Get list of online users
+- `connect` / `disconnect` - Socket lifecycle (authenticated via the `token` cookie)
+- `newMessage` - Emitted to the recipient when a message is sent
+- `getOnlineUsers` - Broadcast list of currently online user IDs
 
 ## 🎨 Features in Detail
 
@@ -264,21 +274,14 @@ Users can upload and share images directly in chat. Images are stored on Cloudin
 
 ## 🚢 Deployment
 
-### Backend Deployment (Railway/Render/Heroku)
+The app deploys as two separate services:
 
-1. Set environment variables in your hosting platform
-2. Ensure `NODE_ENV=production`
-3. Deploy backend code
+- **Frontend** (Vite/React static build) → **Vercel**
+- **Backend** (Express API + Socket.IO) → **Render**
 
-### Frontend Deployment (Vercel/Netlify)
-
-1. Build the frontend: `npm run build`
-2. Deploy the `dist` folder
-3. Configure environment variables
-
-### Full-Stack Deployment
-
-The backend can serve the frontend in production. Build the frontend and the backend will automatically serve it from the `dist` folder.
+CORS and the auth cookie are already configured for this cross-origin setup
+(`CLIENT_URL` on the backend, `VITE_API_URL`/`VITE_SOCKET_URL` on the
+frontend). See `DEPLOYMENT.md` for full, step-by-step instructions.
 
 ## 🤝 Contributing
 

@@ -91,8 +91,14 @@ export const login = async (req,res)=>{
 }
 
 export const logout =  (_,res) =>{
+    // Must match the attributes used in generateToken(), otherwise the browser
+    // won't recognize this as the same cookie and won't clear it.
+    const isProd = process.env.NODE_ENV === "production";
     res.cookie('token','',{
         maxAge:0,
+        httpOnly:true,
+        sameSite: isProd ? "none" : "lax",
+        secure: isProd
     });
     res.status(200).json({message:"Logged out successfully"});
 }
