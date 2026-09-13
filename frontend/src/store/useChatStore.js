@@ -63,7 +63,11 @@ export const useChatStore = create((set, get) => ({
     }
     const unreadCounts = { ...get().unreadCounts };
     delete unreadCounts[selectedUser._id];
-    set({ selectedUser, messages: [], unreadCounts });
+    // Re-selecting the open conversation (same person from the other tab, or
+    // clicking its row again) must not drop the messages already loaded —
+    // the container doesn't remount for the same id, so nothing would refetch.
+    const isSameConversation = get().selectedUser?._id === selectedUser._id;
+    set({ selectedUser, unreadCounts, ...(isSameConversation ? {} : { messages: [] }) });
   },
 
   getAllContacts: async () => {
