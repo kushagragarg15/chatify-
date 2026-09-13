@@ -1,108 +1,84 @@
 import { useState } from "react";
-import { useAuthStore } from "../store/useAuthStore";
-import BorderAnimatedContainer from "../components/BorderAnimatedContainer";
-import { MessageCircleIcon, MailIcon, LoaderIcon, LockIcon } from "lucide-react";
 import { Link } from "react-router";
+import { LoaderIcon, LockIcon, MailIcon } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
+import AuthLayout from "../components/auth/AuthLayout";
+import FormField from "../components/auth/FormField";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 function LoginPage() {
-  const [formData, setFormData] = useState({ email: "", password: "" });
   const { login, isLoggingIn } = useAuthStore();
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({});
+
+  const update = (field) => (e) => {
+    setFormData((f) => ({ ...f, [field]: e.target.value }));
+    if (errors[field]) setErrors((er) => ({ ...er, [field]: undefined }));
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    login(formData);
+    const next = {};
+    if (!EMAIL_RE.test(formData.email.trim())) next.email = "Enter a valid email address.";
+    if (!formData.password) next.password = "Enter your password.";
+    setErrors(next);
+    if (Object.keys(next).length) return;
+    login({ email: formData.email.trim(), password: formData.password });
   };
 
   return (
-    <div className="w-full flex items-center justify-center p-4 bg-slate-900">
-      <div className="relative w-full max-w-6xl md:h-[800px] h-[650px]">
-        <BorderAnimatedContainer>
-          <div className="w-full flex flex-col md:flex-row">
-            {/* FORM CLOUMN - LEFT SIDE */}
-            <div className="md:w-1/2 p-8 flex items-center justify-center md:border-r border-slate-600/30">
-              <div className="w-full max-w-md">
-                {/* HEADING TEXT */}
-                <div className="text-center mb-8">
-                  <MessageCircleIcon className="w-12 h-12 mx-auto text-slate-400 mb-4" />
-                  <h2 className="text-2xl font-bold text-slate-200 mb-2">Welcome Back</h2>
-                  <p className="text-slate-400">Login to access to your account</p>
-                </div>
-
-                {/* FORM */}
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* EMAIL INPUT */}
-                  <div>
-                    <label className="auth-input-label">Email</label>
-                    <div className="relative">
-                      <MailIcon className="auth-input-icon" />
-
-                      <input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="input"
-                        placeholder="johndoe@gmail.com"
-                      />
-                    </div>
-                  </div>
-
-                  {/* PASSWORD INPUT */}
-                  <div>
-                    <label className="auth-input-label">Password</label>
-                    <div className="relative">
-                      <LockIcon className="auth-input-icon" />
-
-                      <input
-                        type="password"
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                        className="input"
-                        placeholder="Enter your password"
-                      />
-                    </div>
-                  </div>
-
-                  {/* SUBMIT BUTTON */}
-                  <button className="auth-btn" type="submit" disabled={isLoggingIn}>
-                    {isLoggingIn ? (
-                      <LoaderIcon className="w-full h-5 animate-spin text-center" />
-                    ) : (
-                      "Sign In"
-                    )}
-                  </button>
-                </form>
-
-                <div className="mt-6 text-center">
-                  <Link to="/signup" className="auth-link">
-                    Don't have an account? Sign Up
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* FORM ILLUSTRATION - RIGHT SIDE */}
-            <div className="hidden md:w-1/2 md:flex items-center justify-center p-6 bg-gradient-to-bl from-slate-800/20 to-transparent">
-              <div>
-                <img
-                  src="/login.png"
-                  alt="People using mobile devices"
-                  className="w-full h-auto object-contain"
-                />
-                <div className="mt-6 text-center">
-                  <h3 className="text-xl font-medium text-cyan-400">Connect anytime, anywhere</h3>
-
-                  <div className="mt-4 flex justify-center gap-4">
-                    <span className="auth-badge">Free</span>
-                    <span className="auth-badge">Easy Setup</span>
-                    <span className="auth-badge">Private</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </BorderAnimatedContainer>
-      </div>
-    </div>
+    <AuthLayout
+      title="Welcome back"
+      subtitle="Sign in to pick up your conversations."
+      footer={
+        <>
+          New to Chatify?{" "}
+          <Link to="/signup" className="focus-ring rounded font-semibold text-lagoon-400 hover:text-lagoon-300">
+            Create an account
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} noValidate className="space-y-5">
+        <FormField
+          label="Email"
+          icon={MailIcon}
+          type="email"
+          name="email"
+          autoComplete="email"
+          inputMode="email"
+          placeholder="you@example.com"
+          value={formData.email}
+          onChange={update("email")}
+          error={errors.email}
+          disabled={isLoggingIn}
+        />
+        <FormField
+          label="Password"
+          icon={LockIcon}
+          type="password"
+          name="password"
+          autoComplete="current-password"
+          placeholder="Your password"
+          value={formData.password}
+          onChange={update("password")}
+          error={errors.password}
+          disabled={isLoggingIn}
+        />
+        <button type="submit" className="btn-primary w-full" disabled={isLoggingIn} aria-busy={isLoggingIn}>
+          {isLoggingIn ? (
+            <>
+              <LoaderIcon className="size-4 animate-spin" aria-hidden="true" />
+              Signing in
+            </>
+          ) : (
+            "Sign in"
+          )}
+        </button>
+      </form>
+    </AuthLayout>
   );
 }
+
 export default LoginPage;

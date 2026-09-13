@@ -24,20 +24,33 @@ export const getChatPartners = async (req, res) => {
                 {senderId:loggedInUserId},
                 {receiverId:loggedInUserId}
             ]
-        });
+        }).sort({createdAt:-1});
 
-        const chatPartnerIds = [
-            ...new Set(
-                messages.map(msg =>
-                    msg.senderId.toString()===loggedInUserId.toString() 
-                    ? msg.receiverId.toString() 
-                    : msg.senderId.toString()
-                )
-            )
-        ];
+        // Newest message per partner, so the client can show a preview and
+        // order the list by recency without a second round-trip.
+        const lastMessageByPartner = new Map();
+        for(const msg of messages){
+            const partnerId = msg.senderId.toString()===loggedInUserId.toString()
+                ? msg.receiverId.toString()
+                : msg.senderId.toString();
+            if(!lastMessageByPartner.has(partnerId)){
+                lastMessageByPartner.set(partnerId,{
+                    text:msg.text,
+                    image:msg.image,
+                    senderId:msg.senderId,
+                    createdAt:msg.createdAt
+                });
+            }
+        }
 
+        const chatPartnerIds = [...lastMessageByPartner.keys()];
         const chatPartners = await User.find({_id:{$in:chatPartnerIds}}).select("-password");
-        res.status(200).json(chatPartners);
+
+        const withPreview = chatPartners
+            .map(user => ({...user.toObject(), lastMessage:lastMessageByPartner.get(user._id.toString())}))
+            .sort((a,b)=> new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt));
+
+        res.status(200).json(withPreview);
     }catch(error){
         console.log("Error in getChatPartners controller:",error);
         res.status(500).json({message:"Internal Server Error"});

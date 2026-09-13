@@ -1,39 +1,57 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { SearchXIcon } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
+import { useAuthStore } from "../store/useAuthStore";
 import UsersLoadingSkeleton from "./UsersLoadingSkeleton";
 import NoChatsFound from "./NoChatsFound";
-import { useAuthStore } from "../store/useAuthStore";
+import ConversationRow from "./ConversationRow";
+import EmptyState from "./ui/EmptyState";
 
 function ChatsList() {
-  const { getMyChatPartners, chats, isUsersLoading, setSelectedUser } = useChatStore();
-  const { onlineUsers } = useAuthStore();
+  const { getMyChatPartners, chats, isChatsLoading, setSelectedUser, selectedUser, unreadCounts, searchQuery } =
+    useChatStore();
+  const { onlineUsers, authUser } = useAuthStore();
 
   useEffect(() => {
     getMyChatPartners();
   }, [getMyChatPartners]);
 
-  if (isUsersLoading) return <UsersLoadingSkeleton />;
+  const query = searchQuery.trim().toLowerCase();
+  const visible = useMemo(
+    () => (query ? chats.filter((c) => c.fullName.toLowerCase().includes(query)) : chats),
+    [chats, query]
+  );
+
+  if (isChatsLoading && chats.length === 0) return <UsersLoadingSkeleton />;
   if (chats.length === 0) return <NoChatsFound />;
+  if (visible.length === 0) {
+    return (
+      <EmptyState
+        compact
+        icon={SearchXIcon}
+        title={`No conversations match “${searchQuery.trim()}”`}
+        description="Try a different name, or look in Contacts."
+      />
+    );
+  }
 
   return (
-    <>
-      {chats.map((chat) => (
-        <div
+    <ul className="py-1" aria-label="Conversations">
+      {visible.map((chat) => (
+        <ConversationRow
           key={chat._id}
-          className="bg-cyan-500/10 p-4 rounded-lg cursor-pointer hover:bg-cyan-500/20 transition-colors"
-          onClick={() => setSelectedUser(chat)}
-        >
-          <div className="flex items-center gap-3">
-            <div className={`avatar ${onlineUsers.includes(chat._id) ? "online" : "offline"}`}>
-              <div className="size-12 rounded-full">
-                <img src={chat.profilePic || "/avatar.png"} alt={chat.fullName} />
-              </div>
-            </div>
-            <h4 className="text-slate-200 font-medium truncate">{chat.fullName}</h4>
-          </div>
-        </div>
+          user={chat}
+          online={onlineUsers.includes(chat._id)}
+          selected={selectedUser?._id === chat._id}
+          unread={unreadCounts[chat._id] || 0}
+          lastMessage={chat.lastMessage}
+          isMine={chat.lastMessage?.senderId === authUser._id}
+          subtitle="Open conversation"
+          onSelect={setSelectedUser}
+        />
       ))}
-    </>
+    </ul>
   );
 }
+
 export default ChatsList;

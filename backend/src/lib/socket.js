@@ -37,8 +37,13 @@ io.on("connection", (socket) => {
   // with socket.on we listen for events from clients
   socket.on("disconnect", () => {
     console.log("A user disconnected", socket.user.fullName);
-    delete userSocketMap[userId];
-    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    // A reconnect (or a second tab) registers a new socket before the old
+    // one's disconnect fires; only clear the entry if it's still ours,
+    // otherwise the user drops offline and stops receiving live messages.
+    if (userSocketMap[userId] === socket.id) {
+      delete userSocketMap[userId];
+      io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    }
   });
 });
 
