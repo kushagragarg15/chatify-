@@ -1,59 +1,60 @@
-# Chatify 💬
+# Chatify
 
-A modern, real-time chat application built with the MERN stack (MongoDB, Express, React, Node.js) featuring Socket.IO for instant messaging, JWT authentication, and a beautiful UI powered by TailwindCSS and DaisyUI.
+Chatify is a real-time, one-to-one messaging application built on the MERN stack (MongoDB, Express, React and Node.js). It delivers messages and presence updates instantly over Socket.IO, secures sessions with HTTP-only JWT cookies, and presents a responsive interface designed to work equally well on desktop, tablet and mobile devices.
 
-![Chatify](https://img.shields.io/badge/version-1.0.0-blue.svg)
+**Live application:** [https://chatify-live-2026.vercel.app](https://chatify-live-2026.vercel.app)
+
+![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![License](https://img.shields.io/badge/license-ISC-green.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)
 
-## ✨ Features
+## Overview
 
-- 🔐 **Secure Authentication** - JWT-based auth with bcrypt password hashing
-- 💬 **Real-time Messaging** - Instant message delivery using Socket.IO
-- 👥 **User Management** - Browse and chat with registered users
-- 🖼️ **Image Sharing** - Upload and share images via Cloudinary integration
-- 📧 **Email Notifications** - Email verification using Resend
-- 🛡️ **Rate Limiting & Security** - Protected with Arcjet security middleware
-- 🎨 **Modern UI** - Sleek interface with TailwindCSS and DaisyUI
-- 🔔 **Message Notifications** - Real-time notification sounds
-- ⌨️ **Keyboard Sound Effects** - Optional typing sound feedback
-- 📱 **Responsive Design** - Works seamlessly on desktop and mobile
-- 🌙 **Dark Theme** - Eye-friendly dark mode interface
+The application is deployed as two independent services: a static React front end hosted on Vercel and an Express API with a Socket.IO server hosted on Render. Authentication, messaging, presence and media upload are handled end to end, and the codebase is organised so that presentation, state management and API integration remain clearly separated.
 
-## 🚀 Tech Stack
+## Features
 
-### Frontend
-- **React 19** - Latest React with modern hooks
-- **Vite** - Lightning-fast build tool
-- **Zustand** - Lightweight state management
-- **Socket.IO Client** - Real-time bidirectional communication
-- **Axios** - HTTP client for API calls
-- **React Router** - Client-side routing
-- **TailwindCSS** - Utility-first CSS framework
-- **DaisyUI** - Beautiful component library
-- **Lucide React** - Icon library
-- **React Hot Toast** - Elegant notifications
+- **Authentication** — Account registration and sign-in with bcrypt-hashed passwords and JSON Web Tokens issued as HTTP-only, cross-site-safe cookies.
+- **Real-time messaging** — Instant delivery of text and image messages via Socket.IO, with optimistic sending, delivery state and automatic reconnection handling.
+- **Presence** — Live online/offline status for every contact, reflected in the conversation list, contact directory and conversation header.
+- **Conversation management** — Conversations ordered by recency with last-message previews, timestamps, unread counts and search across chats and contacts.
+- **Media sharing** — Image attachments and profile photos uploaded to Cloudinary, with in-app preview and full-size viewing.
+- **Responsive interface** — A two-pane layout on larger screens and a dedicated single-pane navigation flow on mobile, with safe-area and on-screen-keyboard handling.
+- **Accessibility** — Keyboard-navigable lists and controls, labelled icon buttons, visible focus states and support for reduced-motion preferences.
+- **Notifications** — Optional audio cues for incoming messages and keystrokes.
+- **Security and abuse protection** — CORS restricted to the deployed client origin, and bot detection, request shielding and rate limiting provided by Arcjet.
+- **Transactional email** — Welcome emails dispatched through Resend upon registration.
 
-### Backend
-- **Node.js & Express 5** - Server framework
-- **MongoDB & Mongoose** - Database and ODM
-- **Socket.IO** - WebSocket server for real-time features
-- **JWT** - Secure token-based authentication
-- **Bcrypt.js** - Password hashing
-- **Cloudinary** - Image upload and management
-- **Resend** - Transactional email service
-- **Arcjet** - Security and rate limiting
-- **Cookie Parser** - HTTP cookie parsing
-- **CORS** - Cross-origin resource sharing
+## Technology Stack
 
-## 📋 Prerequisites
+### Front end
+- **React 19** with **Vite** for development and production builds
+- **Zustand** for application state
+- **React Router** for client-side routing
+- **Socket.IO Client** for real-time communication
+- **Axios** for HTTP requests
+- **Tailwind CSS** with a project-specific design token set
+- **Lucide React** for iconography
+- **React Hot Toast** for user notifications
+
+### Back end
+- **Node.js** and **Express 5**
+- **MongoDB** with **Mongoose**
+- **Socket.IO** for WebSocket transport
+- **jsonwebtoken** and **bcryptjs** for authentication
+- **Cloudinary** for image storage
+- **Resend** for transactional email
+- **Arcjet** for security middleware
+- **cookie-parser** and **cors**
+
+## Prerequisites
 
 Before you begin, ensure you have the following installed:
 - **Node.js** (v18.0.0 or higher)
 - **npm** or **yarn**
 - **MongoDB** (local installation or MongoDB Atlas account)
 
-## 🛠️ Installation
+## Installation
 
 ### 1. Clone the Repository
 
@@ -138,7 +139,7 @@ The application will be available at:
 
 #### Production Mode
 
-See [Deployment](#-deployment) below — the frontend deploys to Vercel and
+See [Deployment](#deployment) below — the frontend deploys to Vercel and
 the backend to Render as separate services. To sanity-check a production
 build locally instead:
 
@@ -153,7 +154,7 @@ cd backend
 NODE_ENV=production npm start
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 chatify/
@@ -187,19 +188,26 @@ chatify/
 ├── frontend/
 │   ├── public/               # Static assets
 │   │   ├── sounds/           # Notification and keyboard sounds
-│   │   └── *.png             # Images
+│   │   └── chatify.svg       # Favicon
 │   ├── src/
 │   │   ├── components/       # React components
+│   │   │   ├── auth/         # AuthLayout, FormField
+│   │   │   ├── ui/           # Avatar, BrandMark, EmptyState
 │   │   │   ├── ChatContainer.jsx
 │   │   │   ├── ChatHeader.jsx
 │   │   │   ├── ChatsList.jsx
 │   │   │   ├── ContactList.jsx
+│   │   │   ├── ConversationRow.jsx
+│   │   │   ├── MessageList.jsx
+│   │   │   ├── MessageBubble.jsx
 │   │   │   ├── MessageInput.jsx
 │   │   │   └── ...
 │   │   ├── hooks/            # Custom React hooks
 │   │   │   └── useKeyboardSound.js
 │   │   ├── lib/              # Utilities
-│   │   │   └── axios.js
+│   │   │   ├── axios.js      # API client
+│   │   │   ├── errors.js     # User-facing error messages
+│   │   │   └── format.js     # Date/time and name formatting
 │   │   ├── pages/            # Page components
 │   │   │   ├── ChatPage.jsx
 │   │   │   ├── LoginPage.jsx
@@ -215,7 +223,7 @@ chatify/
 └── README.md
 ```
 
-## 🔧 Available Scripts
+## Available Scripts
 
 ### Backend
 - `npm run dev` - Start development server with nodemon
@@ -227,7 +235,7 @@ chatify/
 - `npm run preview` - Preview production build
 - `npm run lint` - Run ESLint
 
-## 🔐 API Endpoints
+## API Endpoints
 
 ### Authentication
 - `POST /api/auth/signup` - Register new user
@@ -250,67 +258,51 @@ chatify/
 - `newMessage` - Emitted to the recipient when a message is sent
 - `getOnlineUsers` - Broadcast list of currently online user IDs
 
-## 🎨 Features in Detail
+## Architecture Notes
 
-### Real-time Communication
-Messages are delivered instantly using Socket.IO WebSockets. Users can see who's online in real-time.
+### Real-time communication
+Each authenticated client maintains a single Socket.IO connection. The server keeps a map of user IDs to socket IDs, broadcasts the set of online users whenever it changes, and emits `newMessage` directly to the recipient's socket when a message is stored. The client subscribes once per session, so messages for conversations that are not currently open still update the conversation list and unread counts.
 
-### Image Sharing
-Users can upload and share images directly in chat. Images are stored on Cloudinary for fast delivery.
+### Authentication and sessions
+Credentials are verified with bcrypt and a signed JWT is issued as an HTTP-only cookie. Because the front end and API are served from different origins, the cookie is set with `SameSite=None; Secure` whenever `CLIENT_URL` is an HTTPS origin, and with `SameSite=Lax` for local HTTP development. Protected routes and the Socket.IO handshake both validate the same cookie.
 
-### Security Features
+### Media
+Image attachments and profile photos are received as data URLs, uploaded to Cloudinary, and stored by URL. The client validates file type and size before upload and shows an optimistic preview while the request is in flight.
+
+### Security
 - Password hashing with bcrypt
-- JWT token authentication
-- HTTP-only cookies
-- Rate limiting with Arcjet
-- CORS protection
+- HTTP-only, secure JWT cookies
+- CORS restricted to the configured client origin
+- Bot detection, request shielding and sliding-window rate limiting via Arcjet
 
-### User Experience
-- Loading skeletons for better perceived performance
-- Toast notifications for user feedback
-- Keyboard sound effects (toggleable)
-- Message notification sounds
-- Responsive grid layout
+## Deployment
 
-## 🚢 Deployment
+The application is deployed as two independent services:
 
-The app deploys as two separate services:
+- **Front end** — Vite/React static build hosted on **Vercel**
+- **Back end** — Express API and Socket.IO server hosted on **Render**
 
-- **Frontend** (Vite/React static build) → **Vercel**
-- **Backend** (Express API + Socket.IO) → **Render**
+Cross-origin configuration is handled through `CLIENT_URL` on the back end and `VITE_API_URL` / `VITE_SOCKET_URL` on the front end. Step-by-step instructions are provided in `DEPLOYMENT.md`.
 
-CORS and the auth cookie are already configured for this cross-origin setup
-(`CLIENT_URL` on the backend, `VITE_API_URL`/`VITE_SOCKET_URL` on the
-frontend). See `DEPLOYMENT.md` for full, step-by-step instructions.
+## Contributing
 
-## 🤝 Contributing
+Contributions are welcome. To propose a change:
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/your-feature`).
+3. Commit your changes with a descriptive message.
+4. Push the branch and open a pull request describing the change and how it was tested.
 
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 License
+## License
 
 This project is licensed under the ISC License.
 
-## 🙏 Acknowledgments
+## Acknowledgements
 
-- Socket.IO for real-time communication
-- MongoDB for database
-- Cloudinary for image hosting
-- Resend for email services
-- Arcjet for security features
+Chatify is built on Socket.IO, MongoDB, Cloudinary, Resend and Arcjet.
 
-## 📧 Contact
+## Contact
 
-Kushagra Garg - [@kushagragarg15](https://github.com/kushagragarg15)
+Kushagra Garg — [github.com/kushagragarg15](https://github.com/kushagragarg15)
 
-Project Link: [https://github.com/kushagragarg15/chatify-](https://github.com/kushagragarg15/chatify-)
-
----
-
-⭐ If you find this project useful, please consider giving it a star!
+Repository: [github.com/kushagragarg15/chatify-](https://github.com/kushagragarg15/chatify-)
