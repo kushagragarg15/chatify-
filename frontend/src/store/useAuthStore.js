@@ -62,6 +62,22 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
+  // account: "alex" | "sam" — two demo users that already share a conversation.
+  demoLogin: async (account) => {
+    set({ isLoggingIn: true });
+    try {
+      const res = await axiosInstance.post("/auth/demo-login", { account });
+      set({ authUser: res.data });
+      toast.success(`Signed in as ${res.data.fullName}`);
+      get().connectSocket();
+    } catch (error) {
+      console.error("Demo login failed:", error);
+      toast.error(getErrorMessage(error, "Couldn't start the demo. Please try again."));
+    } finally {
+      set({ isLoggingIn: false });
+    }
+  },
+
   logout: async () => {
     try {
       await axiosInstance.post("/auth/logout");

@@ -4,6 +4,8 @@ Chatify is a real-time, one-to-one messaging application built on the MERN stack
 
 **Live application:** [https://chatify-live-2026.vercel.app](https://chatify-live-2026.vercel.app)
 
+**Try it without signing up:** on the sign-in page, click **Enter as Alex**, then open the site in a second window (or incognito) and click **Enter as Sam**. The two demo accounts share a conversation, so you can watch messages and online status update live between them.
+
 ![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)
 ![License](https://img.shields.io/badge/license-ISC-green.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)
@@ -240,6 +242,7 @@ chatify/
 ### Authentication
 - `POST /api/auth/signup` - Register new user
 - `POST /api/auth/login` - Login user
+- `POST /api/auth/demo-login` - Sign in to a demo account (`{ "account": "alex" | "sam" }`); creates the demo users and a sample conversation on first use
 - `POST /api/auth/logout` - Logout user
 - `GET /api/auth/check` - Check authentication status
 - `PUT /api/auth/update-profile` - Update user profile

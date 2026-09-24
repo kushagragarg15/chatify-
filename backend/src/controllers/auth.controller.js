@@ -4,6 +4,7 @@ import { generateToken, getAuthCookieOptions } from "../lib/utils.js";
 import dotenv from "dotenv";
 import { sendWelcomeEmail } from "../emails/emailHandlers.js";
 import cloudinary from "../lib/cloudinary.js";
+import { ensureDemoUsers, isDemoUser } from "../lib/demo.js";
 
 dotenv.config();
 
@@ -90,6 +91,25 @@ export const login = async (req,res)=>{
     }
 }
 
+export const demoLogin = async (req,res)=>{
+    const account = req.body?.account === "sam" ? "sam" : "alex";
+    try{
+        const users = await ensureDemoUsers();
+        const user = users[account];
+
+        generateToken(user._id, res);
+        res.status(200).json({
+            _id:user._id,
+            fullName:user.fullName,
+            email:user.email,
+            profilePicture:user.profilePicture
+        });
+    }catch(error){
+        console.log("Error in demoLogin controller:",error);
+        res.status(500).json({message:"Internal Server Error"});
+    }
+}
+
 export const logout =  (_,res) =>{
     // Reuses generateToken()'s cookie options — the attributes must match
     // what was used to set the cookie, otherwise the browser won't recognize
@@ -106,6 +126,9 @@ export const updateProfile = async (req,res) =>{
         const {profilePicture} = req.body;
         if(!profilePicture){
             return res.status(400).json({message:"Profile picture is required"});
+        }
+        if(isDemoUser(req.user)){
+            return res.status(403).json({message:"Profile photos can't be changed on demo accounts"});
         }
         const userId = req.user._id;
 
